@@ -1,31 +1,28 @@
 # =====================================================================
-# Konfiguration eures Implementation Guides
+# Konfiguration der Musterlösung
 #
-# Schritt 3 im Aufgabenblatt: Passt die Zeilen mit TODO an.
-# Alles andere könnt ihr so lassen.
+# Schritt 3 im Aufgabenblatt: Die Zeilen, die in der Vorlage mit TODO
+# markiert waren, sind hier ausgefüllt.
 # Doku: https://fshschool.org/docs/sushi/configuration/
 # =====================================================================
 
-# TODO: Paket-ID. Nur Kleinbuchstaben, Ziffern und Punkte.
-# Ersetzt "vorlage" durch euer ZHAW-Kürzel, z. B. ch.zhaw.dg.amuster
-id: ch.zhaw.dg.vorlage
+# Paket-ID. Nur Kleinbuchstaben, Ziffern und Punkte.
+id: ch.zhaw.dg.musterloesung
 
-# TODO: Adresse eurer GitHub-Pages-Seite, ohne Schrägstrich am Ende.
-# Muster: https://<github-benutzername>.github.io/<repo-name>
-canonical: https://example.github.io/dg-ig
+# Adresse der GitHub-Pages-Seite, ohne Schrägstrich am Ende.
+canonical: https://brodbeckleon.github.io/dg-ig-musterloesung
 
-# TODO: Computerlesbarer Name, ohne Leerzeichen und Sonderzeichen.
-name: DGVorlageIG
+# Computerlesbarer Name, ohne Leerzeichen und Sonderzeichen.
+name: DGMusterloesungIG
 
-# TODO: Titel, der oben auf eurer IG-Seite steht.
-title: "DG Lab IG Vorlage"
+# Titel, der oben auf der IG-Seite steht.
+title: "DG Lab IG Musterlösung: Arzneimittelallergie"
 
-# TODO: Ein Satz zu eurem Use Case.
-description: "Implementation Guide aus dem Lab Data Standards in Healthcare an der ZHAW."
+# Ein Satz zum Use Case.
+description: "Musterlösung zum Lab Data Standards in Healthcare (ZHAW): Eine Hausarztpraxis erfasst Arzneimittelallergien so, dass eine Notfallstation sie zuverlässig auswerten kann."
 
-# TODO: Euer Name.
 publisher:
-  name: "ZHAW Data Standards in Healthcare, Vorname Nachname"
+  name: "ZHAW Data Standards in Healthcare, Léon Brodbeck"
 
 # ---------------------------------------------------------------------
 # Ab hier nichts ändern
