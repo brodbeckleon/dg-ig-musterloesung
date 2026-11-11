@@ -1,0 +1,9 @@
+# Von SUSHI und IG Publisher erzeugt, nicht einchecken
+fsh-generated/
+output/
+temp/
+template/
+input-cache/
+publisher.jar
+*.log
+.DS_Store

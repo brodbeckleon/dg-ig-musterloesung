@@ -1,0 +1,159 @@
+# =====================================================================
+# Baut das IG bei jedem Push auf main und veröffentlicht es auf
+# GitHub Pages. Diese Datei müsst ihr nicht ändern.
+#
+# Ablauf:
+#   1. sushi    : FSH kompilieren (schnell, ca. 1 Minute)
+#   2. ig       : IG Publisher baut Website und QA-Report (mehrere Minuten)
+#   3. deploy   : Website auf GitHub Pages veröffentlichen
+#
+# Manuell starten: Tab "Actions" -> "IG bauen" -> "Run workflow".
+# Dort könnt ihr den Terminologieserver auf "n/a" stellen, falls
+# tx.fhir.org nicht erreichbar ist.
+# =====================================================================
+
+name: IG bauen
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tx:
+        description: "Terminologieserver (n/a = ohne Terminologieprüfung)"
+        required: false
+        default: "https://tx.fhir.org"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Ein neuer Push bricht einen noch laufenden Build ab.
+concurrency:
+  group: ig-build
+  cancel-in-progress: true
+
+env:
+  SUSHI_VERSION: "3.21.0"
+
+jobs:
+  sushi:
+    name: 1. SUSHI
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
+      - name: FHIR-Pakete aus dem Cache laden
+        uses: actions/cache@v6
+        with:
+          path: ~/.fhir/packages
+          key: fhir-packages-${{ hashFiles('sushi-config.yaml') }}
+          restore-keys: fhir-packages-
+
+      - name: SUSHI installieren
+        run: npm install -g fsh-sushi@${SUSHI_VERSION}
+
+      - name: FSH kompilieren
+        run: |
+          set -o pipefail
+          sushi build . 2>&1 | tee sushi.log
+          {
+            echo "## SUSHI"
+            echo '```'
+            tail -n 25 sushi.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  ig:
+    name: 2. IG Publisher
+    needs: sushi
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+
+      - name: FHIR-Pakete aus dem Cache laden
+        uses: actions/cache@v6
+        with:
+          path: ~/.fhir/packages
+          key: fhir-packages-${{ hashFiles('sushi-config.yaml') }}
+          restore-keys: fhir-packages-
+
+      - name: Werkzeuge installieren (SUSHI, Jekyll, IG Publisher)
+        run: |
+          npm install -g fsh-sushi@${SUSHI_VERSION}
+          gem install jekyll --no-document
+          curl -sSL -o publisher.jar \
+            https://github.com/HL7/fhir-ig-publisher/releases/latest/download/publisher.jar
+
+      - name: ig.ini erzeugen
+        run: |
+          ID=$(grep -E '^id:' sushi-config.yaml | head -1 | awk '{print $2}')
+          printf '[IG]\nig = fsh-generated/resources/ImplementationGuide-%s.json\ntemplate = fhir.base.template#current\n' "$ID" > ig.ini
+          cat ig.ini
+
+      - name: IG bauen
+        env:
+          TX: ${{ github.event.inputs.tx || 'https://tx.fhir.org' }}
+        run: |
+          java -Xmx6g -jar publisher.jar -ig ig.ini -tx "$TX" 2>&1 | tee publisher.log || true
+          test -f output/index.html || { echo "::error::IG Publisher hat keine Website erzeugt. Siehe publisher.log im Artefakt."; exit 1; }
+
+      - name: Zusammenfassung des QA-Reports
+        if: always()
+        run: |
+          python3 - <<'EOF' >> "$GITHUB_STEP_SUMMARY" || true
+          import json, os
+          print("## QA-Report")
+          try:
+              qa = json.load(open("output/qa.json"))
+              print(f"| Errors | Warnings | Hints |\n|---|---|---|\n| {qa.get('errs','?')} | {qa.get('warnings','?')} | {qa.get('hints','?')} |")
+          except Exception as e:
+              print(f"qa.json nicht gefunden ({e}).")
+          repo = os.environ.get("GITHUB_REPOSITORY", "/")
+          owner, name = repo.split("/")
+          print(f"\nNach dem Deploy: https://{owner.lower()}.github.io/{name}/qa.html")
+          EOF
+
+      - name: Log aufbewahren
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-logs
+          path: |
+            publisher.log
+            output/qa.html
+          if-no-files-found: ignore
+
+      - name: Website für GitHub Pages vorbereiten
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: output
+
+  deploy:
+    name: 3. Veröffentlichen
+    needs: ig
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

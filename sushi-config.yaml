@@ -1,0 +1,55 @@
+# =====================================================================
+# Konfiguration eures Implementation Guides
+#
+# Schritt 3 im Aufgabenblatt: Passt die Zeilen mit TODO an.
+# Alles andere könnt ihr so lassen.
+# Doku: https://fshschool.org/docs/sushi/configuration/
+# =====================================================================
+
+# TODO: Paket-ID. Nur Kleinbuchstaben, Ziffern und Punkte.
+# Ersetzt "vorlage" durch euer ZHAW-Kürzel, z. B. ch.zhaw.dg.amuster
+id: ch.zhaw.dg.vorlage
+
+# TODO: Adresse eurer GitHub-Pages-Seite, ohne Schrägstrich am Ende.
+# Muster: https://<github-benutzername>.github.io/<repo-name>
+canonical: https://example.github.io/dg-ig
+
+# TODO: Computerlesbarer Name, ohne Leerzeichen und Sonderzeichen.
+name: DGVorlageIG
+
+# TODO: Titel, der oben auf eurer IG-Seite steht.
+title: "DG Lab IG Vorlage"
+
+# TODO: Ein Satz zu eurem Use Case.
+description: "Implementation Guide aus dem Lab Data Standards in Healthcare an der ZHAW."
+
+# TODO: Euer Name.
+publisher:
+  name: "ZHAW Data Standards in Healthcare, Vorname Nachname"
+
+# ---------------------------------------------------------------------
+# Ab hier nichts ändern
+# ---------------------------------------------------------------------
+status: draft
+experimental: true
+version: 0.1.0
+fhirVersion: 4.0.1
+releaseLabel: ci-build
+license: CC0-1.0
+copyrightYear: 2026+
+jurisdiction: urn:iso:std:iso:3166#CH "Switzerland"
+
+# Euer IG baut auf CH Core auf. CH Term enthält die Schweizer
+# Codelisten (ValueSets), die CH Core verwendet.
+dependencies:
+  ch.fhir.ig.ch-core: 6.0.0
+  ch.fhir.ig.ch-term: 3.3.0
+
+pages:
+  index.md:
+    title: Home
+
+menu:
+  Home: index.html
+  Artefakte: artifacts.html
+  QA-Report: qa.html

@@ -1,0 +1,6 @@
+== Suppressed Messages ==
+
+# Hier könnt ihr Warnungen aus dem QA-Report unterdrücken.
+# Kopiert dazu den Text der Warnung exakt in eine eigene Zeile.
+# Jede unterdrückte Warnung begründet ihr im Report.
+# Errors lassen sich nicht unterdrücken, die müsst ihr beheben.
